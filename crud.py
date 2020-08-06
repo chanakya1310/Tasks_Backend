@@ -12,3 +12,6 @@ def create_task(db : Session, task : schemas.TaskCreate):
 
 def get_tasks(db : Session, skip : int = 0, limit : int = 100):
     return db.query(models.Task).offset(skip).limit(limit).all()
+
+def get_task_by_id(db : Session, id : str):
+    return db.query(models.Task).filter(models.Task.id == id).first() 

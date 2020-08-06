@@ -31,3 +31,10 @@ def read_tasks(skip : int = 0, limit : int = 100, db : Session = Depends(get_db)
     tasks = crud.get_tasks(db, skip = skip, limit = limit)
     return tasks
 
+@app.get("/tasks/{id}", response_model = schemas.Task)
+def read_task(id : int, db : Session = Depends(get_db)):
+    db_user = crud.get_task_by_id(db, id = id)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="Task not found")
+    return db_user
+
