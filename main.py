@@ -21,20 +21,23 @@ def get_db():
         yield db
     finally:
         db.close()
-    
-@app.post("/tasks", response_model = schemas.Task)
-def create_task(task : schemas.TaskCreate, db : Session = Depends(get_db)):
-    return crud.create_task(db = db, task = task)
 
-@app.get("/tasks", response_model = List[schemas.Task])
-def read_tasks(skip : int = 0, limit : int = 100, db : Session = Depends(get_db)):
-    tasks = crud.get_tasks(db, skip = skip, limit = limit)
-    return tasks
+@app.post("/users/", response_model = schemas.User)
+def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+    db_user = crud.get_user_by_email(db, email = user.email)
+    if db_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    return crud.create_user(db = db, user = user)
 
-@app.get("/tasks/{id}", response_model = schemas.Task)
-def read_task(id : int, db : Session = Depends(get_db)):
-    db_user = crud.get_task_by_id(db, id = id)
-    if db_user is None:
-        raise HTTPException(status_code=404, detail="Task not found")
-    return db_user
+@app.get("/users/", response_model=List[schemas.User])
+def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    users = crud.get_users(db, skip = skip, limit = limit)
+    return users
+
+@app.post("/users/{user_id}/tasks/", response_model=schemas.Task)
+def create_task_for_user(
+    user_id: int, task: schemas.TaskCreate, db: Session = Depends(get_db)
+):
+    return crud.create_user_task(db=db, task = task, user_id = user_id)
+
 
